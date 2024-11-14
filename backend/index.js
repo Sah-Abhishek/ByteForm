@@ -8,11 +8,14 @@ const mongoDbUri = process.env.MONGODB_URI;
 const Form = require('./Model/Form');
 const jwtSecret = process.env.JWT_SECRET;
 const authMiddleware = require('./middleware/authMIddleware.js')
+const cors = require('cors');
 
 
 
 // Middleware
 const app = express();
+app.use(cors());
+
 app.use(express.json()); // To parse json bodies
 
 connectMongoDB(mongoDbUri);
@@ -60,17 +63,19 @@ app.post("/signup", async(req, res) => {
 
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
+    console.log("email: ", email);
+    console.log("password: ", password);
 
     try{
         const existingUser = await User.findOne({ email});
         if(!existingUser) {
             return res.status(400).json({
-                message: "Email or password is incorrect"
+                message: "Email  is incorrect"
             });
         }
         if(existingUser.password !== password){
             return res.status(400).json({
-                message: "Email or password is incorrect"
+                message: "password is incorrect"
             });
         }
 
@@ -83,7 +88,11 @@ app.post("/login", async (req, res) => {
 
         res.status(201).json({
             message: "Login Successfull",
-            token
+            token,
+            user: {
+                email: existingUser.email,
+                username: existingUser.username
+            }
         })
 
 
