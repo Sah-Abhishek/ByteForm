@@ -8,6 +8,9 @@ const SignupEmail = () => {
     return (
         <div className="flex flex-col justify-center items-center space-y-5">
             <div className="">
+                <input type="text" placeholder="Username"  className="border border-gray-400 px-3 py-2 rounded-md w-72"/>
+            </div>
+            <div className="">
                 <input type="text" placeholder="Email"  className="border border-gray-400 px-3 py-2 rounded-md w-72"/>
             </div>
             <div className="">

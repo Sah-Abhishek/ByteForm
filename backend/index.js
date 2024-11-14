@@ -6,6 +6,8 @@ const User = require('./Model/User.js');
 const PORT = process.env.PORT || 3000;
 const mongoDbUri = process.env.MONGODB_URI;
 const Form = require('./Model/Form');
+const jwtSecret = process.env.JWT_SECRET;
+const authMiddleware = require('./middleware/authMIddleware.js')
 
 
 
@@ -56,18 +58,53 @@ app.post("/signup", async(req, res) => {
     }
 })
 
+app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
 
-app.post("/createForm", async(req, res) => {
-    const {title, description, fields, createdBy} = req.body;
-    console.log("This is req.body from /createForm", req.body);
+    try{
+        const existingUser = await User.findOne({ email});
+        if(!existingUser) {
+            return res.status(400).json({
+                message: "Email or password is incorrect"
+            });
+        }
+        if(existingUser.password !== password){
+            return res.status(400).json({
+                message: "Email or password is incorrect"
+            });
+        }
 
-    const user = await User.findOne({ username: createdBy });
-    console.log("This is the user from /createForm", user);
-    if(!user){
-        return res.status(400).json({
-            message: "No user found"
+        // Generate token after successfull authentication
+
+        const token = jwt.sign({
+            username: existingUser.username,
+            email: existingUser.email
+        }, jwtSecret);
+
+        res.status(201).json({
+            message: "Login Successfull",
+            token
+        })
+
+
+    }catch(error){
+        console.log("Error durng Login");
+        res.status(500).json({
+            message: "Internal Server Error"
         })
     }
+})
+
+
+app.post("/createForm", authMiddleware, async(req, res) => {
+    
+    const { username, email } = req.user;
+    const {title, description, fields} = req.body;
+    console.log("This is req.user from /login ", req.user);
+    console.log("This is req.body from /createForm", req.body);
+
+    const user = await User.findOne({ username });
+    console.log("This is the user from /createForm", user);
     const newForm = new Form({
         title,
         description,
