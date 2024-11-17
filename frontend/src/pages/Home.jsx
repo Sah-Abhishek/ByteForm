@@ -1,15 +1,69 @@
+import axios from "axios";
 import { BsThreeDots } from "react-icons/bs";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import useAuthStore from "../store/authStore";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useFormStore from "../store/formStore";
 
 const Home = () => {
-    const user = 'Abhishek Sah';
-    const forms = [{ name: "first form", responses: 23, updatedAt: '12 Nov 2024' }, { name: "second form", responses: 23, updatedAt: '12 Nov 2024' }, { name: "third form", responses: 23, updatedAt: '12 Nov 2024' }, { name: "fourth form", responses: 23, updatedAt: '12 Nov 2024' }]
+    const { token, user } = useAuthStore();
+    const baseURL = import.meta.env.VITE_BACK_URL;
+    // const [forms, setForms] = useState([]);
+    const state = useAuthStore.getState();
+    const navigate = useNavigate();
+    const { forms, setForms } = useFormStore();
+    // const user = 'Abhishek Sah';
+
+    // Fetch forms data when the component mounts
+    useEffect(() => {
+        console.log("This is the user in Home.jsx: ", user);
+        console.log("The zustand state: ", state);
+        const fetchForms = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/getAllForms`);
+                setForms(response.data); // Correctly set the forms state
+                console.log("This should be inside zustand Store as forms: ", response.data); // Log the data from the response
+            } catch (error) {
+                console.log("Error fetching forms: ", error);
+            }
+        };
+
+        fetchForms(); // Call the async function inside useEffect
+    }, []); // Empty dependency array means this effect runs once on mount
+
+    // Function to create a new form
+    const createDefaultForm = async () => {
+        try {
+            const response = await axios.post("http://localhost:3000/createNewForm", {}, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            const formId = response.data._id;
+            console.log(response.data);
+            if (response.status === 200) {
+                toast.success("Form created");
+            }
+        } catch (err) {
+            console.log("There was an error while creating new form");
+        }
+    };
+
+    const handleFormClick = async (formId) => {
+        console.log("This is the formId from Home.jsx: ", formId);
+        navigate(`/form/${formId}`);
+
+    }
 
     return (
         <div>
             <nav className="flex items-center justify-between w-full pb-4">
                 <div className="flex items-center">
-                    <button className="bg-black rounded-md text-white p-2 h-10 w-10 font-semibold m-2 mx-3">{user.charAt(0)}</button>
-                    <span>{user}</span>
+                    <button className="bg-black rounded-md text-white p-2 h-10 w-10 font-semibold m-2 mx-3">{user.username.charAt(0)}</button>
+                    <span>{user.username}</span>
                     <span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3 mx-3">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -18,30 +72,29 @@ const Home = () => {
                 </div>
                 <div><button className="bg-red text-white rounded-md px-3 py-1 mr-4 bg-[#ae4e09] text-sm">View plans</button></div>
             </nav>
-            <div className=" flex flex-col justify-center items-center mx-6 bg-gray-100 h-[calc(100vh-72px)] overflow-auto rounded-xl">
+            <div className="flex flex-col justify-center items-center mx-6 bg-gray-100 h-[calc(100vh-72px)] overflow-auto rounded-xl">
                 <div className="flex justify-center items-center">
-                    <button className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-700 transition w-80 font-semibold">+ &nbsp; Create a new form</button>
+                    <button onClick={createDefaultForm} className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-700 transition w-80 font-semibold">+ &nbsp; Create a new form</button>
                 </div>
                 <hr className="my-4 mt-10 border-t-2 border-gray-300 w-[1700px]" />
-                <div className="flex items-center px-4 py-3 text-sm  w-[1500px]">
+                <div className="flex items-center px-4 py-3 text-sm w-[1500px]">
                     <div className="w-[66.66%]"></div>
                     <div className="flex justify-between w-[33.33%]">
                         <h3>Responses</h3>
-
                         <h3 className="mr-20">Updated At</h3>
                     </div>
                 </div>
 
                 <div className="mt-4 space-y-3">
                     {forms.map((form, index) => (
-                        <div key={index} className="flex items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition">
-                            <h3 className="w-[66.66%] ">{form.name.charAt(0).toUpperCase() + form.name.slice(1)}</h3>
-                            <div className="w-[33.33%] flex  justify-between borde">
+                        <div onClick={() => handleFormClick(form._id)} key={index} className="flex items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition">
+                            <h3 className="w-[66.66%]">{form.title}</h3> {/* Corrected here */}
+                            <div className="w-[33.33%] flex justify-between">
                                 <div className="px-7">
-                                    <div className="flex ">{form.responses}</div>
+                                    <div className="flex">{form.responses}</div>
                                 </div>
                                 <div className="flex space-x-12">
-                                    <span className="text-gray-500">{form.updatedAt}</span>
+                                    <span className="text-gray-500">{form.updatedAt.split('T')[0]}</span>
                                     <span className="hover:rounded-md p-1 hover:bg-gray-200 transition">
                                         <BsThreeDots />
                                     </span>
@@ -50,10 +103,9 @@ const Home = () => {
                         </div>
                     ))}
                 </div>
-
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default Home;

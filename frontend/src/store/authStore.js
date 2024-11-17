@@ -1,70 +1,73 @@
 import { create } from 'zustand';
 import axios from 'axios';
 
-const useAuthStore = create((set) => ({
-    user: null,
-    token: null,
+// A utility function to save the user and token in localStorage
+const saveToLocalStorage = (user, token) => {
+  if (user && token) {
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token', token);
+  }
+};
+
+// A utility function to get the user and token from localStorage
+const getFromLocalStorage = () => {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const token = localStorage.getItem('token');
+  return { user, token };
+};
+
+const useAuthStore = create((set) => {
+  const { user, token } = getFromLocalStorage(); // Load user and token from localStorage on app load
+
+  return {
+    user: user || null, // Default to null if no user found
+    token: token || null, // Default to null if no token found
     loading: false,
     error: null,
 
-    setUser: (user, token) => set({ user }),
+    // Set user and token in Zustand store and localStorage
+    setUser: (user, token) => {
+      set({ user, token });
+      saveToLocalStorage(user, token); // Save to localStorage
+    },
 
-    logOut: () => set({ user: null, token: null}),
+    logOut: () => {
+      set({ user: null, token: null });
+      localStorage.removeItem('user');
+      localStorage.removeItem('token'); // Remove from localStorage
+    },
 
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
 
     login: async (email, password) => {
-        set({ loading: true, error: null });  // Reset error and set loading to true
-        try {
-            const response = await axios.post("http://localhost:3000/login", {
-                email, password
-            });
-            const { user, token } = response.data;
-            set({ user, token, loading: false });
-            localStorage.setItem('token', token);  // Save token in localStorage
-            return { success: true };  // Return success response to the component
-    
-        } catch (err) {
-            // If there's an error, set the error message in the store
-            const errorMessage = err.response?.data?.message || 'An error occurred during login.';
-            console.log("Error from login:", errorMessage);
-            set({ error: errorMessage });  // Set only the message part of the error
-            return { success: false, message: errorMessage };  // Return error message and status
-        } finally {
-            set({ loading: false });  // Reset loading state
-        }
+      set({ loading: true, error: null });  // Reset error and set loading to true
+      try {
+        const response = await axios.post("http://localhost:3000/login", { email, password });
+        const { user, token } = response.data;
+        set({ loading: false });
+        saveToLocalStorage(user, token);  // Save to localStorage
+        set({ user, token });
+        return { success: true };
+      } catch (err) {
+        const errorMessage = err.response?.data?.message || 'An error occurred during login.';
+        set({ error: errorMessage, loading: false });
+        return { success: false, message: errorMessage };
+      }
     },
-    
 
     signup: async (username, email, password) => {
-        set({ loading: true, error: null });  // Reset any previous loading or error state
-        
-        try {
-            // Make the API call to signup
-            const response = await axios.post("http://localhost:3000/signup", { username, email, password });
-            
-            console.log("This is the response from the backend: ", response.data);
-            return response;  // Return the response to be handled in the component
-        } catch (err) {
-            console.error("Error in signup process: ", err);
-            
-            // Check if error response exists and contains a message
-            const errorMessage = err.response?.data?.message || "An unknown error occurred.";
-            console.log("Error from backend: ", errorMessage);
-            
-            // Update the store with the error message
-            set({ error: errorMessage });
-            
-            // Optionally throw the error to handle it in the component (e.g., for a global error handler)
-            throw new Error(errorMessage);  // You can customize this if necessary
-        } finally {
-            // Reset loading state after completion (success or error)
-            set({ loading: false });
-        }
+      set({ loading: true, error: null });
+      try {
+        const response = await axios.post("http://localhost:3000/signup", { username, email, password });
+        return response;
+      } catch (err) {
+        const errorMessage = err.response?.data?.message || "An unknown error occurred.";
+        set({ error: errorMessage, loading: false });
+        throw new Error(errorMessage);
+      }
     }
-    
-    
-    
-}))
+  };
+});
+
 export default useAuthStore;

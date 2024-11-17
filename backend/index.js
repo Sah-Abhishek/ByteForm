@@ -9,6 +9,7 @@ const Form = require('./Model/Form');
 const jwtSecret = process.env.JWT_SECRET;
 const authMiddleware = require('./middleware/authMIddleware.js')
 const cors = require('cors');
+const { default: mongoose } = require('mongoose');
 
 
 
@@ -20,25 +21,25 @@ app.use(express.json()); // To parse json bodies
 
 connectMongoDB(mongoDbUri);
 
-app.post("/signup", async(req, res) => {
-    const {username, email, password} = req.body;
+app.post("/signup", async (req, res) => {
+    const { username, email, password } = req.body;
     console.log("username: ", username);
     console.log("password: ", password);
     console.log("email: ", email);
 
-    try{
+    try {
         // Check if email already in use
         const [existingEmail, existingUsername] = await Promise.all([
             User.findOne({ email }),
             User.findOne({ username })
-        ]);        if(existingEmail){
+        ]); if (existingEmail) {
             return res.status(400).json({
                 message: "Email already in use"
             })
         }
 
         // Check if the username already exist
-        if(existingUsername){
+        if (existingUsername) {
             return res.status(400).json({
                 message: "Username already in use"
             })
@@ -55,8 +56,8 @@ app.post("/signup", async(req, res) => {
         res.status(201).json({
             message: "User created successfully"
         })
-        
-    }catch(error){
+
+    } catch (error) {
         console.log("Error during signup", error);
         res.status(500).json({
             message: "Internal Server Error"
@@ -69,14 +70,14 @@ app.post("/login", async (req, res) => {
     console.log("email: ", email);
     console.log("password: ", password);
 
-    try{
-        const existingUser = await User.findOne({ email});
-        if(!existingUser) {
+    try {
+        const existingUser = await User.findOne({ email });
+        if (!existingUser) {
             return res.status(400).json({
                 message: "Email  is incorrect"
             });
         }
-        if(existingUser.password !== password){
+        if (existingUser.password !== password) {
             return res.status(400).json({
                 message: "password is incorrect"
             });
@@ -99,7 +100,7 @@ app.post("/login", async (req, res) => {
         })
 
 
-    }catch(error){
+    } catch (error) {
         console.log("Error durng Login");
         res.status(500).json({
             message: "Internal Server Error"
@@ -108,10 +109,27 @@ app.post("/login", async (req, res) => {
 })
 
 
-app.post("/createForm", authMiddleware, async(req, res) => {
-    
+app.get("/form/:formId", async (req, res) => {
+    const { formId } = req.params;
+    console.log("This is the formId from frontend: ", formId);
+    try {
+        const form = await Form.findById(formId);
+        if (!form) {
+            return res.status(404).json({
+                message: "Form not found"
+            })
+        }
+        res.status(200).json(form);
+    }
+    catch (error) {
+        console.log("Error while fetching specific form: ", error);
+    }
+})
+
+app.post("/createForm", authMiddleware, async (req, res) => {
+
     const { username, email } = req.user;
-    const {title, description, fields} = req.body;
+    const { title, description, fields } = req.body;
     console.log("This is req.user from /login ", req.user);
     console.log("This is req.body from /createForm", req.body);
 
@@ -128,6 +146,71 @@ app.post("/createForm", authMiddleware, async(req, res) => {
         message: "Form created successfully"
     })
 
+})
+
+app.post("/createNewForm", authMiddleware, async (req, res) => {
+    try {
+        const { username, } = req.user;
+        console.log("username: ", username);
+        // console.log("password: ", password);
+        const defaultForm = {
+            title: "My new form",
+            description: "This is a starter form that can be customized",
+            welcome: "Welcome to default form",
+            endingPage: "Thanks for completing the form",
+            pages: [
+                {
+                    type: "text",
+                    title: "What is your name?",
+                    description: "Enter your full name",
+                    order: 1,
+                    isRequired: true,
+                    placeholder: "Enter your name"
+                },
+                {
+                    type: "Multiple Choice question",
+                    title: "How satisfied are you?",
+                    options: ["very satisfied", "satisfied", "neutral", "dissatisfied"],
+                    order: 2,
+                    isRequired: true
+                },
+                {
+                    type: 'radioButton',
+                    title: 'Would you recommend this service?',
+                    options: ['Yes', 'No'],
+                    order: 3,
+                    isRequired: true,
+                },
+            ],
+            createdBy: new mongoose.Types.ObjectId(),
+        }
+
+        const newForm = new Form(defaultForm);
+        console.log("This is the new form: ", newForm);
+        const savedForm = await newForm.save();
+        res.status(201).json(savedForm);
+
+
+    } catch (error) {
+        console.log("There was an error creating a new form: ", error);
+        res.status(500).json({
+            message: "Error creating default form"
+        })
+    }
+})
+
+
+app.get("/getAllForms", async (req, res) => {
+    try {
+        const forms = await Form.find();
+        res.status(200).json(forms);
+
+    } catch (error) {
+        console.log("There was an error while fetching all forms from database: ", error);
+        res.status(500).json({
+            message: "There was an error while fetching all the forms from the database"
+        })
+    }
 })
 
 

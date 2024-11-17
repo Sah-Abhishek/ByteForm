@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Login from './components/Login.jsx';
 import Home from './pages/Home.jsx';
 import Signup from './components/Signup.jsx';
+import EditForm from './components/EditForm.jsx';
 
 const router = createBrowserRouter([
    {
@@ -17,12 +18,15 @@ const router = createBrowserRouter([
   },{
     path: "/signup",
     element: <Signup />
+  },{
+    path: "form/:formId",
+    element: <EditForm/>
   }
 ]);
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  
     <RouterProvider router={router} />
 
-  </StrictMode>,
+  
 )
