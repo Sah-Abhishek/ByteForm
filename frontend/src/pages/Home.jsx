@@ -34,7 +34,7 @@ const Home = () => {
 
                 <div className="mt-4 space-y-3">
                     {forms.map((form, index) => (
-                        <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition">
+                        <div key={index} className="flex items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition">
                             <h3 className="w-[66.66%] ">{form.name.charAt(0).toUpperCase() + form.name.slice(1)}</h3>
                             <div className="w-[33.33%] flex  justify-between borde">
                                 <div className="px-7">

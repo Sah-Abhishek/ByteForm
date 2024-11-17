@@ -22,6 +22,9 @@ connectMongoDB(mongoDbUri);
 
 app.post("/signup", async(req, res) => {
     const {username, email, password} = req.body;
+    console.log("username: ", username);
+    console.log("password: ", password);
+    console.log("email: ", email);
 
     try{
         // Check if email already in use
@@ -50,7 +53,7 @@ app.post("/signup", async(req, res) => {
         })
         await newUser.save();
         res.status(201).json({
-            message: "User create successfully"
+            message: "User created successfully"
         })
         
     }catch(error){
