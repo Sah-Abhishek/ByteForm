@@ -6,6 +6,7 @@ import useAuthStore from "../store/authStore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useFormStore from "../store/formStore";
+import { useForm } from "react-hook-form";
 
 const Home = () => {
     const { token, user } = useAuthStore();
@@ -14,6 +15,7 @@ const Home = () => {
     const state = useAuthStore.getState();
     const navigate = useNavigate();
     const { forms, setForms } = useFormStore();
+    const { selectForm } = useFormStore();
     // const user = 'Abhishek Sah';
 
     // Fetch forms data when the component mounts
@@ -53,6 +55,7 @@ const Home = () => {
     };
 
     const handleFormClick = async (formId) => {
+        selectForm(formId);
         console.log("This is the formId from Home.jsx: ", formId);
         navigate(`/form/${formId}`);
 
@@ -87,7 +90,7 @@ const Home = () => {
 
                 <div className="mt-4 space-y-3">
                     {forms.map((form, index) => (
-                        <div onClick={() => handleFormClick(form._id)} key={index} className="flex items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition">
+                        <div onClick={() => handleFormClick(form._id)} key={index} className="flex cursor-pointer items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition">
                             <h3 className="w-[66.66%]">{form.title}</h3> {/* Corrected here */}
                             <div className="w-[33.33%] flex justify-between">
                                 <div className="px-7">

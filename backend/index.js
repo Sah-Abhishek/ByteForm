@@ -148,6 +148,29 @@ app.post("/createForm", authMiddleware, async (req, res) => {
 
 })
 
+app.put('/forms/:formId', async (req, res) => {
+    const { formId } = req.params;
+    const { title, description } = req.body;
+    console.log(title, description);
+
+    try {
+        const updatedForm = await Form.findByIdAndUpdate(
+            formId,
+            { title, description },
+            { new: true } // Return the updated form
+        );
+
+        if (!updatedForm) {
+            return res.status(404).json({ message: "Form not found" });
+        }
+
+        res.json(updatedForm); // Send the updated form back in the response
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
 app.post("/createNewForm", authMiddleware, async (req, res) => {
     try {
         const { username, } = req.user;
