@@ -10,6 +10,7 @@ const jwtSecret = process.env.JWT_SECRET;
 const authMiddleware = require('./middleware/authMIddleware.js')
 const cors = require('cors');
 const { default: mongoose } = require('mongoose');
+const { nanoid } = require('nanoid');
 
 
 
@@ -260,7 +261,7 @@ app.post("/createNewForm", authMiddleware, async (req, res) => {
 })
 
 
-        
+
 app.post("/editform/addPage/:formId", async (req, res) => {
     const formId = req.params.formId;
     console.log("This is to add content to form: ", formId);
@@ -268,7 +269,7 @@ app.post("/editform/addPage/:formId", async (req, res) => {
     const { pageType, } = req.body;
 
     // Validate input
-    if (!pageType ) {
+    if (!pageType) {
         return res.status(400).json({
             message: "PageType or pagesLength is missing"
         });
@@ -281,7 +282,7 @@ app.post("/editform/addPage/:formId", async (req, res) => {
         if (pageType === "Multiple Choice Question" || pageType === "radioButton") {
             newPage = {
                 type: pageType,
-                title: "",
+                title: "...",
                 description: "",
                 // order: pagesLength - 1,  // Placeholder order, we will adjust later
                 options: [],
@@ -290,7 +291,7 @@ app.post("/editform/addPage/:formId", async (req, res) => {
         } else if (pageType === "text") {
             newPage = {
                 type: pageType,
-                title: "",
+                title: "...",
                 description: "",
                 // order: pagesLength - 1,  // Placeholder order, we will adjust later
                 isRequired: false
@@ -338,8 +339,40 @@ app.post("/editform/addPage/:formId", async (req, res) => {
     }
 });
 
+app.post("/form/publish/:formId", async (req, res) => {
+    try {
+        const formId = req.params.formId;
+        console.log("This is the formId from form/publish: ", formId);
+        const uuid = nanoid();
+        console.log("This is from the form/publish: ", uuid);
 
-    
+        const form = await Form.findById(formId);
+        console.log(form)
+
+        if (!form) {return res.status(404).json({
+            message: "Form not found"
+        })};
+
+        form.uuid = uuid;
+
+        form.published = "published";
+
+        await form.save();
+
+        res.status(200).json({
+            message: "Form published successfully"
+        })
+    } catch (error) {
+        console.log("There was an error while publishing the form: ", error);
+        res.status(500).json({
+            message: "Internal server error"
+        })
+    }
+
+
+})
+
+
 
 
 app.get("/getAllForms", async (req, res) => {

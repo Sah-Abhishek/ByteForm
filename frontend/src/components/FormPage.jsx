@@ -130,7 +130,7 @@ const FormPage = ({ selectedForm, currentPageIndex, handleNextPage, handlePrevio
                                         </label>
                                     ))}
                                 </div>
-                            ) : currentPage.type === "Multiple Choice question" ? (
+                            ) : currentPage.type === "Multiple Choice Question" ? (
                                 <div className="flex flex-col mt-4 ">
                                     <div className="flex flex-col ">
                                         {currentPage.options.map((option, index) => (

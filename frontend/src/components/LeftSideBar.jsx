@@ -3,7 +3,7 @@ import useFormStore from "../store/formStore";
 import AddContentModal from "./AddContentModal";
 
 const LeftSideBar = ({ setCurrentPageIndex }) => {
-  const { selectedForm, reorderPages, removePage } = useFormStore();
+  const { selectedForm, reorderPages, deletePage } = useFormStore();
   const [draggedIndex, setDraggedIndex] = useState(null);
   const colors = [
     { name: 'Red', class: 'bg-red-300' },
@@ -58,7 +58,8 @@ const LeftSideBar = ({ setCurrentPageIndex }) => {
 
   // Delete page function
   const handleDeletePage = (index) => {
-    removePage(selectedForm.pages[index]._id); // Call your delete function from zustand store
+    console.log("This is from the leftSidebar handleDeletePage: ", selectedForm.pages[index]);
+    deletePage(selectedForm.pages[index]._id); // Call your delete function from zustand store
     setDropdownOpen(null); // Close the dropdown after deleting
   };
 
@@ -109,7 +110,7 @@ const LeftSideBar = ({ setCurrentPageIndex }) => {
             {/* Dropdown for Delete */}
             {dropdownOpen === index && (
               <div className="dropdown absolute right-3 top-1/2 transform -translate-y-1/2 bg-white shadow-md border rounded-md mt-2 p-2 w-24 text-sm">
-                <button  className="text-red-500 w-full text-xs px-1.5 py-1 hover:bg-gray-100 rounded-md">
+                <button onClick={() => handleDeletePage(index)} className="text-red-500 w-full text-xs px-1.5 py-1 hover:bg-gray-100 rounded-md">
                   Delete
                 </button>
               </div>

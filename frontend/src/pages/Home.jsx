@@ -12,21 +12,21 @@ const Home = () => {
     const baseURL = import.meta.env.VITE_BACK_URL;
     const navigate = useNavigate();
     const { forms, setForms } = useFormStore();
-    const { selectForm } = useFormStore();
+    const { selectForm, getAllForms } = useFormStore();
     
     // Fetch forms data when the component mounts or when forms change
     useEffect(() => {
-        const fetchForms = async () => {
-            try {
-                const response = await axios.get(`${baseURL}/getAllForms`);
-                setForms(response.data); // Correctly set the forms state in zustand
-                console.log("Fetched forms: ", response.data); // Log the data from the response
-            } catch (error) {
-                console.log("Error fetching forms: ", error);
-            }
-        };
+        // const fetchForms = async () => {
+        //     try {
+        //         const response = await axios.get(`${baseURL}/getAllForms`);
+        //         setForms(response.data); // Correctly set the forms state in zustand
+        //         console.log("Fetched forms: ", response.data); // Log the data from the response
+        //     } catch (error) {
+        //         console.log("Error fetching forms: ", error);
+        //     }
+        // };
 
-        fetchForms(); // Fetch forms when the component mounts or when forms change in zustand
+        getAllForms(); // Fetch forms when the component mounts or when forms change in zustand
     }, [forms]); // Dependency on the forms state
 
     // Function to create a new form

@@ -34,7 +34,8 @@ const formFieldSchema = new mongoose.Schema({
     order: {
         type: Number, // To maintain the order of pages/fields in the form
         required: true
-    }
+    },
+    
 }, {
     timestamps: true
 });
@@ -67,6 +68,14 @@ const formSchema = new mongoose.Schema({
     endingPage: {
         type: String, // Title of the ending page
         default: 'Thank you for completing the form!'
+    },
+    published: {
+        type: String,
+        default: "Not published"
+    },
+    uuid: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true

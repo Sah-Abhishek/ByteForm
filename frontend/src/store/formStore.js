@@ -21,43 +21,58 @@ const useFormStore = create(
           selectedForm: state.forms.find((form) => form._id === formId) || null,
         })),
 
+      getAllForms: async () => {
+        try {
+          const response = await axios.get("http://localhost:3000/getAllForms");
+
+          // After getting the response, update the forms state
+          set((state) => {
+            return { forms: response.data };
+          });
+
+          console.log("Fetched forms: ", response.data); // Log the data from the response
+        } catch (error) {
+          console.log("Error fetching forms: ", error);
+        }
+      },
+
       // Function to update the form title and description
       updatePageTitleAndDescription: async (pageId, newTitle, newDescription) => {
         set((state) => {
-            if (!state.selectedForm) return state;
+          if (!state.selectedForm) return state;
 
-            // Find the page by ID and update its title and description
-            const updatedPages = state.selectedForm.pages.map((page) =>
-                page._id === pageId // Check the ID to find the specific page
-                    ? { ...page, title: newTitle, description: newDescription }
-                    : page
-            );
+          // Find the page by ID and update its title and description
+          const updatedPages = state.selectedForm.pages.map((page) =>
+            page._id === pageId // Check the ID to find the specific page
+              ? { ...page, title: newTitle, description: newDescription }
+              : page
+          );
 
-            const updatedForm = {
-                ...state.selectedForm,
-                pages: updatedPages,
-            };
+          const updatedForm = {
+            ...state.selectedForm,
+            pages: updatedPages,
+          };
 
-            // Send the updated form to the backend
-            updateFormInBackend(updatedForm, set); // Pass set here
+          // Send the updated form to the backend
+          updateFormInBackend(updatedForm, set); // Pass set here
 
-            return {
-                selectedForm: updatedForm, // Update selected form in state
-                forms: state.forms.map((form) =>
-                  form._id === updatedForm._id ? updatedForm : form
-                ),
-            };
+          return {
+            selectedForm: updatedForm, // Update selected form in state
+            forms: state.forms.map((form) =>
+              form._id === updatedForm._id ? updatedForm : form
+            ),
+          };
         });
       },
-      addNewPage:(pageType) => {
+      addNewPage: (pageType) => {
         set(async (state) => {
-          if(!state.selectedForm) return state;
+          if (!state.selectedForm) return state;
 
-          try{
+          try {
             const response = await axios.post(`http://localhost:3000/editform/addpage/${state.selectedForm._id}`, {
               pageType
             });
-            if(response.status === 200){
+            if (response.status === 200) {
               console.log("Page Added Succesfully")
             }
             console.log("This is the updatedForm from zustand Store AddnewPage: ", response.data.form);
@@ -72,18 +87,49 @@ const useFormStore = create(
             console.log("This is the updatedForm from zustand Store AddNewPage: ", updatedForm);
 
             return state;
-            
-          }catch(error){
+
+          } catch (error) {
             console.log("There was an error", error);
           }
 
         })
       },
 
-      updateFormTitleandDescription: async(newTitle) => {
+      // publishForm: (formId) => {
+      //   set((state) => {
+
+      //   })
+      // },
+
+      deletePage: async (pageId) => {
         set((state) => {
-          if(!state.selectForm) return state;
-          
+          if (!state.selectedForm) return state;
+
+          // Filter out the page with the given ID
+          const updatedPages = state.selectedForm.pages.filter((page) => page._id !== pageId);
+
+          // Update the form with the new pages list
+          const updatedForm = {
+            ...state.selectedForm,
+            pages: updatedPages,
+          };
+
+          // Update the backend with the new form data
+          updateFormInBackend(updatedForm, set);
+
+          return {
+            selectedForm: updatedForm,
+            forms: state.forms.map((form) =>
+              form._id === updatedForm._id ? updatedForm : form
+            ),
+          };
+        });
+      },
+
+      updateFormTitleandDescription: async (newTitle) => {
+        set((state) => {
+          if (!state.selectForm) return state;
+
           const updatedForm = {
             ...state.selectedForm,
             title: newTitle,
@@ -92,9 +138,9 @@ const useFormStore = create(
           updateFormInBackend(updatedForm, set);
           return {
             selectedForm: updatedForm,
-            forms: state.forms.map((form) => 
+            forms: state.forms.map((form) =>
               form._id === updatedForm._id ? updatedForm : form
-          )
+            )
           }
 
         })
@@ -203,7 +249,7 @@ const updateFormInBackend = async (updatedForm, set) => {
 
     if (response.status === 200) {
       console.log("Form updated successfully in the backend.");
-      
+
       // Set the updated form as the selected form in the store
       set((state) => ({
         selectedForm: updatedForm,
