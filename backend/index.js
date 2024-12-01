@@ -130,19 +130,19 @@ app.put("/updateform/:formId", async (req, res) => {
     try {
         const { formId, } = req.params;
         const updatedForm = req.body;
-        console.log("Form from frontend: ", updatedForm);
-        console.log(formId);
-        if(!formId ){
-            return res.status(405).json({ message: "Required formId"});
+        // console.log("Form from frontend: ", updatedForm);
+        // console.log(formId);
+        if (!formId) {
+            return res.status(405).json({ message: "Required formId" });
         }
-        if(!updatedForm) return res.status(405).json({ message: "Required updatedForm"});
+        if (!updatedForm) return res.status(405).json({ message: "Required updatedForm" });
 
         // const { title, description, pages } = req.body;
         const resultForm = await Form.findByIdAndUpdate(formId,
             updatedForm,
             { new: true }
         );
-        console.log("This is the result from mongodb", resultForm);
+        // console.log("This is the result from mongodb", resultForm);
 
         if (!resultForm) {
             return res.status(400).json({
@@ -226,7 +226,7 @@ app.post("/createNewForm", authMiddleware, async (req, res) => {
                     placeholder: "Enter your name"
                 },
                 {
-                    type: "Multiple Choice question",
+                    type: "Multiple Choice Question",
                     title: "How satisfied are you?",
                     description: "How was our service",
                     options: ["very satisfied", "satisfied", "neutral", "dissatisfied"],
@@ -258,6 +258,88 @@ app.post("/createNewForm", authMiddleware, async (req, res) => {
         })
     }
 })
+
+
+        
+app.post("/editform/addPage/:formId", async (req, res) => {
+    const formId = req.params.formId;
+    console.log("This is to add content to form: ", formId);
+
+    const { pageType, } = req.body;
+
+    // Validate input
+    if (!pageType ) {
+        return res.status(400).json({
+            message: "PageType or pagesLength is missing"
+        });
+    }
+
+    let newPage;  // Declare newPage here to make it accessible in the entire try block
+
+    try {
+        // Define new page based on pageType
+        if (pageType === "Multiple Choice Question" || pageType === "radioButton") {
+            newPage = {
+                type: pageType,
+                title: "",
+                description: "",
+                // order: pagesLength - 1,  // Placeholder order, we will adjust later
+                options: [],
+                isRequired: false
+            };
+        } else if (pageType === "text") {
+            newPage = {
+                type: pageType,
+                title: "",
+                description: "",
+                // order: pagesLength - 1,  // Placeholder order, we will adjust later
+                isRequired: false
+            };
+        } else {
+            return res.status(400).json({
+                message: "Page type not found"
+            });
+        }
+
+        // Fetch the current form to determine the second-to-last position in the pages array
+        const form = await Form.findById(formId);
+
+        if (!form) {
+            return res.status(404).json({
+                message: "Form not found"
+            });
+        }
+
+        // Determine the second-to-last position in the pages array
+        const pages = form.pages;
+        const secondLastIndex = pages.length - 1;
+
+        if (secondLastIndex >= 0) {
+            // If there are at least two pages, we insert at the second-to-last position
+            pages.splice(secondLastIndex, 0, newPage);  // Insert newPage at second-to-last index
+        } else {
+            // If there are fewer than two pages, we append the page to the end
+            pages.push(newPage);
+        }
+
+        // Save the updated form with the new page added at the second-to-last position
+        const updatedForm = await Form.findByIdAndUpdate(formId, { pages }, { new: true });
+
+        res.status(200).json({
+            message: "Page added successfully",
+            form: updatedForm
+        });
+
+    } catch (error) {
+        console.error("There was an error adding the page:", error);
+        res.status(500).json({
+            message: "Error adding page to the form"
+        });
+    }
+});
+
+
+    
 
 
 app.get("/getAllForms", async (req, res) => {

@@ -7,7 +7,7 @@ const useFormStore = create(
     (set) => ({
       forms: [], // Array to hold form data
       selectedForm: null, // Store the form that is selected
-      currentPageIndex: 0, // Tracks the current page index
+      currentPageIndex: null, // Tracks the current page index
 
       // Function to set the list of forms
       setForms: (forms) => set({ forms }),
@@ -44,10 +44,60 @@ const useFormStore = create(
             return {
                 selectedForm: updatedForm, // Update selected form in state
                 forms: state.forms.map((form) =>
-                    form._id === updatedForm._id ? updatedForm : form
+                  form._id === updatedForm._id ? updatedForm : form
                 ),
             };
         });
+      },
+      addNewPage:(pageType) => {
+        set(async (state) => {
+          if(!state.selectedForm) return state;
+
+          try{
+            const response = await axios.post(`http://localhost:3000/editform/addpage/${state.selectedForm._id}`, {
+              pageType
+            });
+            if(response.status === 200){
+              console.log("Page Added Succesfully")
+            }
+            console.log("This is the updatedForm from zustand Store AddnewPage: ", response.data.form);
+            const updatedForm = response.data.form;
+            set((state) => ({
+              selectedForm: updatedForm,
+              forms: state.forms.map((form) =>
+                form._id === updatedForm._id ? updatedForm : form
+              ),
+            }));
+
+            console.log("This is the updatedForm from zustand Store AddNewPage: ", updatedForm);
+
+            return state;
+            
+          }catch(error){
+            console.log("There was an error", error);
+          }
+
+        })
+      },
+
+      updateFormTitleandDescription: async(newTitle) => {
+        set((state) => {
+          if(!state.selectForm) return state;
+          
+          const updatedForm = {
+            ...state.selectedForm,
+            title: newTitle,
+          }
+
+          updateFormInBackend(updatedForm, set);
+          return {
+            selectedForm: updatedForm,
+            forms: state.forms.map((form) => 
+              form._id === updatedForm._id ? updatedForm : form
+          )
+          }
+
+        })
       },
 
       removeOption: (pageId, option) => {
