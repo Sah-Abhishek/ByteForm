@@ -14,11 +14,13 @@ const EditForm = () => {
     const formTitle = selectedForm.title;
     const baseURL = import.meta.VITE_BACK_URL;
     const state = useFormStore.getState();
+    // const [title, setTitle] = useState(currentPageIndex.title);
+    // const [desc, setDesc] = useState(currentPageIndex.description);
 
     useEffect(() => {
         selectForm(formId);
-        
-    console.log("The is the newest state: ", state);
+
+        console.log("The is the newest state: ", state);
     }, [formId, selectForm])
 
     useEffect(() => {
@@ -66,15 +68,17 @@ const EditForm = () => {
             </nav>
 
             {/* Main Content */}
-            <div className="flex flex-grow">
+            <div className="flex flex-grow ">
                 {/* Sidebar */}
                 <div className="w-1/5">
                     {/* Pass setCurrentPageIndex to LeftSideBar */}
                     <LeftSideBar setCurrentPageIndex={setCurrentPageIndex} />
                 </div>
 
+
                 {/* Form Content */}
-                <div className="flex-grow border m-4 p-6 rounded-xl">
+                <div className="flex justify-center items-center flex-col flex-grow m-4 p-6 rounded-xl border-red-500">
+                    
                     {selectedForm ? (
                         <FormPage
                             selectedForm={selectedForm}

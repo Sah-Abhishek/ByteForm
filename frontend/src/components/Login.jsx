@@ -113,8 +113,8 @@ const Login = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <button type="submit" className={`flex items-center space-x-6 justify-center text-sm`}>
-                        <div className={`flex justify-center items-center border-2 ${loading ? "bg-gray-700" : "bg-black"} text-white px-3 py-2 hover:bg-gray-700 mb-3 h-12 rounded-md w-80 font-semibold`}>
+                    <button type="submit" className={`flex items-center space-x-6 justify-center text-sm border-none`}>
+                        <div className={`flex justify-center items-center ${loading ? "bg-gray-700" : "bg-black"} text-white px-3 py-2 hover:bg-gray-700 mb-3 h-12 rounded-md w-80 font-semibold`}>
                             <span>{loading ? 'Loading...' : 'Continue with email'}</span>
                         </div>
                     </button>

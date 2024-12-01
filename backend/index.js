@@ -126,6 +126,41 @@ app.get("/form/:formId", async (req, res) => {
     }
 })
 
+app.put("/updateform/:formId", async (req, res) => {
+    try {
+        const { formId, } = req.params;
+        const updatedForm = req.body;
+        console.log("Form from frontend: ", updatedForm);
+        console.log(formId);
+        if(!formId ){
+            return res.status(405).json({ message: "Required formId"});
+        }
+        if(!updatedForm) return res.status(405).json({ message: "Required updatedForm"});
+
+        // const { title, description, pages } = req.body;
+        const resultForm = await Form.findByIdAndUpdate(formId,
+            updatedForm,
+            { new: true }
+        );
+        console.log("This is the result from mongodb", resultForm);
+
+        if (!resultForm) {
+            return res.status(400).json({
+                message: "Form not found"
+            })
+        }
+        res.status(200).json({
+            message: "Form UpdatedSuccesfully",
+            resultForm
+        })
+    } catch (error) {
+        console.log("There was an error while updating form: ", error);
+        res.status(500).json({
+            message: "There was an error while updating form"
+        })
+    }
+})
+
 app.post("/createForm", authMiddleware, async (req, res) => {
 
     const { username, email } = req.user;
@@ -193,12 +228,14 @@ app.post("/createNewForm", authMiddleware, async (req, res) => {
                 {
                     type: "Multiple Choice question",
                     title: "How satisfied are you?",
+                    description: "How was our service",
                     options: ["very satisfied", "satisfied", "neutral", "dissatisfied"],
                     order: 2,
                     isRequired: true
                 },
                 {
                     type: 'radioButton',
+                    description: "Choose from this",
                     title: 'Would you recommend this service?',
                     options: ['Yes', 'No'],
                     order: 3,

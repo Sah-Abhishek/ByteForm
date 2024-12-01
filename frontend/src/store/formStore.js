@@ -22,16 +22,43 @@ const useFormStore = create(
         })),
 
       // Function to update the form title and description
-      updatePageTitleAndDescription: async (newTitle, newDescription) =>
+      updatePageTitleAndDescription: async (pageId, newTitle, newDescription) => {
+        set((state) => {
+            if (!state.selectedForm) return state;
+
+            // Find the page by ID and update its title and description
+            const updatedPages = state.selectedForm.pages.map((page) =>
+                page._id === pageId // Check the ID to find the specific page
+                    ? { ...page, title: newTitle, description: newDescription }
+                    : page
+            );
+
+            const updatedForm = {
+                ...state.selectedForm,
+                pages: updatedPages,
+            };
+
+            // Send the updated form to the backend
+            updateFormInBackend(updatedForm, set); // Pass set here
+
+            return {
+                selectedForm: updatedForm, // Update selected form in state
+                forms: state.forms.map((form) =>
+                    form._id === updatedForm._id ? updatedForm : form
+                ),
+            };
+        });
+      },
+
+      removeOption: (pageId, option) => {
         set((state) => {
           if (!state.selectedForm) return state;
 
-          const currentPage = state.selectedForm.pages[state.currentPageIndex];
+          console.log("This is the option clicked: ", option);
 
-          // Update the title and description of the current page in the state
-          const updatedPages = state.selectedForm.pages.map((page, index) =>
-            index === state.currentPageIndex
-              ? { ...page, title: newTitle, description: newDescription }
+          const updatedPages = state.selectedForm.pages.map((page) =>
+            page._id === pageId
+              ? { ...page, options: page.options.filter((opt) => opt !== option) }
               : page
           );
 
@@ -40,22 +67,47 @@ const useFormStore = create(
             pages: updatedPages,
           };
 
-          // Update the forms list with the updated form in state
-          const updatedForms = state.forms.map((form) =>
-            form._id === updatedForm._id ? updatedForm : form
-          );
-
-          // Send the PUT request to the backend to update the database
-          updateFormInBackend(updatedForm);
+          updateFormInBackend(updatedForm, set); // Pass set here
 
           return {
             selectedForm: updatedForm,
-            forms: updatedForms,
+            forms: state.forms.map((form) =>
+              form._id === updatedForm._id ? updatedForm : form
+            ),
           };
-        }),
+        });
+      },
 
       // Function to set the current page index
       setCurrentPageIndex: (index) => set({ currentPageIndex: index }),
+
+      addOption: (pageId, newOption) => {
+        set((state) => {
+          if (!state.selectedForm || !newOption) return state;
+
+          // Find the page and add the new option to its options
+          const updatedPages = state.selectedForm.pages.map((page) =>
+            page._id === pageId
+              ? { ...page, options: [...page.options, newOption] }
+              : page
+          );
+
+          const updatedForm = {
+            ...state.selectedForm,
+            pages: updatedPages,
+          };
+
+          // Update the backend with the new option
+          updateFormInBackend(updatedForm, set); // Pass set here
+
+          return {
+            selectedForm: updatedForm,
+            forms: state.forms.map((form) =>
+              form._id === updatedForm._id ? updatedForm : form
+            ),
+          };
+        });
+      },
 
       // Function to reorder pages within the selected form
       reorderPages: (startIndex, endIndex) =>
@@ -69,6 +121,8 @@ const useFormStore = create(
             ...state.selectedForm,
             pages: updatedPages,
           };
+
+          updateFormInBackend(updatedForm, set);
 
           // Update forms list with the updated form
           return {
@@ -92,16 +146,21 @@ const useFormStore = create(
   )
 );
 
-const updateFormInBackend = async (updatedForm) => {
+// Function to update form in the backend
+const updateFormInBackend = async (updatedForm, set) => {
   try {
-    const response = await axios.put(`http://localhost/forms/${updatedForm._id}`, {
-      title: updatedForm.title,
-      description: updatedForm.description,
-      pages: updatedForm.pages,
-    });
+    const response = await axios.put(`http://localhost:3000/updateform/${updatedForm._id}`, updatedForm);
 
     if (response.status === 200) {
       console.log("Form updated successfully in the backend.");
+      
+      // Set the updated form as the selected form in the store
+      set((state) => ({
+        selectedForm: updatedForm,
+        forms: state.forms.map((form) =>
+          form._id === updatedForm._id ? updatedForm : form
+        ),
+      }));
     } else {
       console.error("Failed to update the form in the backend.");
     }
