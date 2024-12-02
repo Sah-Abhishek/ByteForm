@@ -6,6 +6,7 @@ import useAuthStore from "../store/authStore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useFormStore from "../store/formStore";
+import { useStore } from "zustand";
 
 const Home = () => {
     const { token, user } = useAuthStore();
@@ -13,20 +14,29 @@ const Home = () => {
     const navigate = useNavigate();
     const { forms, setForms } = useFormStore();
     const { selectForm, getAllForms } = useFormStore();
-    
+    // const { user } = useAuthStore();
+
+    useEffect(() => {
+        // console.log(user, token);
+        if (!user || !token) {
+            navigate('/login');
+        }
+    }, [user, token])
+
     // Fetch forms data when the component mounts or when forms change
     useEffect(() => {
-        // const fetchForms = async () => {
-        //     try {
-        //         const response = await axios.get(`${baseURL}/getAllForms`);
-        //         setForms(response.data); // Correctly set the forms state in zustand
-        //         console.log("Fetched forms: ", response.data); // Log the data from the response
-        //     } catch (error) {
-        //         console.log("Error fetching forms: ", error);
-        //     }
-        // };
+        const fetchForms = async () => {
+            try {
+                const response = await axios.get(`${baseURL}/getAllForms`);
+                setForms(response.data); // Correctly set the forms state in zustand
+                console.log("Fetched forms: ", response.data); // Log the data from the response
+            } catch (error) {
+                console.log("Error fetching forms: ", error);
+            }
+        };
+        fetchForms();
 
-        getAllForms(); // Fetch forms when the component mounts or when forms change in zustand
+        // getAllForms(); // Fetch forms when the component mounts or when forms change in zustand
     }, [forms]); // Dependency on the forms state
 
     // Function to create a new form
@@ -43,7 +53,7 @@ const Home = () => {
                 // After creating the form, refetch forms
                 const newForms = await axios.get(`${baseURL}/getAllForms`);
                 setForms(newForms.data); // Update zustand with the latest forms
-                
+
             }
         } catch (err) {
             console.log("Error creating form: ", err);
@@ -60,8 +70,11 @@ const Home = () => {
         <div>
             <nav className="flex items-center justify-between w-full pb-4">
                 <div className="flex items-center">
-                    <button className="bg-black rounded-md text-white p-2 h-10 w-10 font-semibold m-2 mx-3">{user.username.charAt(0)}</button>
-                    <span>{user.username}</span>
+                    <button className="bg-black rounded-md text-white p-2 h-10 w-10 font-semibold m-2 mx-3">
+                        {user ? user.username.charAt(0) : "?"} {/* Default to "?" if user is null */}
+                    </button>
+                    <span>{user ? user.username : "Guest"}</span> {/* Fallback to "Guest" if user is null */}
+
                     <span>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3 mx-3">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />

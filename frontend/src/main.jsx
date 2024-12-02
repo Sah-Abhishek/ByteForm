@@ -7,6 +7,7 @@ import Login from './components/Login.jsx';
 import Home from './pages/Home.jsx';
 import Signup from './components/Signup.jsx';
 import EditForm from './components/EditForm.jsx';
+import FormSubmitPage from './pages/FormSubmitPage.jsx';
 
 const router = createBrowserRouter([
    {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
   },{
     path: "form/:formId",
     element: <EditForm/>
+  },
+  {
+    path: "submitpage/:formId",
+    element: <FormSubmitPage />
   }
 ]);
 

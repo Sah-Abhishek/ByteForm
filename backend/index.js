@@ -360,7 +360,8 @@ app.post("/form/publish/:formId", async (req, res) => {
         await form.save();
 
         res.status(200).json({
-            message: "Form published successfully"
+            message: "Form published successfully",
+            uuid: uuid
         })
     } catch (error) {
         console.log("There was an error while publishing the form: ", error);
@@ -370,6 +371,33 @@ app.post("/form/publish/:formId", async (req, res) => {
     }
 
 
+})
+
+app.get("/getsubmitform/:uuid", async(req, res) => {
+    const uuid = req.params.uuid;
+
+    try{
+        const form = await Form.find({uuid: uuid});
+
+        if(!form){
+            res.status(404).json({
+                message: "There was an error while fetching form"
+            })
+        }
+        res.status(200).json({
+            message: "Form fetched succesfully",
+            form: form
+        })
+
+
+
+
+    }catch(error){
+        console.log("There was an error fetching form: ", error);
+        res.status(500).json({
+            message: "Internal Server Error"
+        })
+    }
 })
 
 

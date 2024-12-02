@@ -9,9 +9,10 @@ const formFieldSchema = new mongoose.Schema({
     title: {
         type: String,
         trim: true,
-        required: true
+        default: "...",
     },
     description: {
+        default: "...",
         type: String,
         trim: true,
     },
@@ -33,7 +34,7 @@ const formFieldSchema = new mongoose.Schema({
     },
     order: {
         type: Number, // To maintain the order of pages/fields in the form
-        required: true
+        
     },
     
 }, {

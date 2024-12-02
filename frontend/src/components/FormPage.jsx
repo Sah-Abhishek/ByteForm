@@ -136,7 +136,7 @@ const FormPage = ({ selectedForm, currentPageIndex, handleNextPage, handlePrevio
                                         {currentPage.options.map((option, index) => (
                                             <button
                                                 key={index}
-                                                className="mt-2 px-4 py-2 bg-white text-back border-2 border-gray-700 rounded-md group relative"
+                                                className="mt-2 px-4 py-2 bg-white text-back border-2 border-gray-700 rounded-md group "
                                             >
                                                 {/* SVG Icon */}
                                                 <span
@@ -201,7 +201,7 @@ const FormPage = ({ selectedForm, currentPageIndex, handleNextPage, handlePrevio
                 </div>
 
                 {/* Navigation buttons */}
-                <div className="mt-36 flex justify-between gap-x-32">
+                <div className="mt-36 bottom-40 flex fixed justify-between gap-x-32">
                     <button
                         onClick={handlePreviousPage}
                         disabled={currentPageIndex === 0}

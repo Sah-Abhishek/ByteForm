@@ -126,7 +126,7 @@ const useFormStore = create(
         });
       },
 
-      updateFormTitleandDescription: async (newTitle) => {
+      updateFormTitleAndDescription: async (newTitle) => {
         set((state) => {
           if (!state.selectForm) return state;
 
@@ -134,6 +134,8 @@ const useFormStore = create(
             ...state.selectedForm,
             title: newTitle,
           }
+
+          console.log(updatedForm);
 
           updateFormInBackend(updatedForm, set);
           return {

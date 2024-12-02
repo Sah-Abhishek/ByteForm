@@ -5,6 +5,7 @@ import useFormStore from "../store/formStore"; // Zustand store for selected for
 import LeftSideBar from "./LeftSideBar";
 import FormPage from "./FormPage"; // Assuming the page rendering component is FormPage
 import axios from "axios";
+import PublishFormModal from "./PublishFormModal";
 
 const EditForm = () => {
     const { formId } = useParams(); // Get form ID from URL
@@ -14,11 +15,21 @@ const EditForm = () => {
     const [formTitle, setFormTitle] = useState(selectedForm?.title); // Form title state
     const baseURL = import.meta.VITE_BACK_URL;
     const state = useFormStore.getState();
+    const [formUuid, setFormUuid] = useState('');
 
     const [isEditing, setIsEditing] = useState(false);
     const titleRef = useRef(null);
     const [publishLoading, setPublishLoading] = useState(false);
+    const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+    const closePublishModal = () => setIsPublishModalOpen(false);
+    const openPublishModal = () => setIsPublishModalOpen(true);
+    const changeUuid = (id) => {
+        setFormUuid(id)
+    }
 
+    const handleTitleChangeOnBlur = () => {
+        updateFormTitleAndDescription(formTitle);
+    }
     useEffect(() => {
         selectForm(formId);
 
@@ -62,7 +73,10 @@ const EditForm = () => {
         setPublishLoading(true);
         try {
             const response = await axios.post(`http://localhost:3000/form/publish/${selectedForm._id}`);
-
+            if(response.status === 200){
+                setFormUuid(response.data.uuid);
+                setIsPublishModalOpen(true);
+            }
 
         } catch (error) {
             console.log("There was an error while publishing form: ", error);
@@ -98,11 +112,11 @@ const EditForm = () => {
                     <div ref={titleRef}>
                         {isEditing ? (
                             <div>
-                                <input onChange={(e) => setFormTitle(e.target.value)} value={formTitle} />
+                                <input onBlur={handleTitleChangeOnBlur} onChange={(e) => setFormTitle(e.target.value)} value={formTitle ? formTitle : "..."} />
                             </div>
                         ) : (
                             <div onDoubleClick={handleDoubleClick} onBlur={handleBlur}>
-                                <span className="text-sm">{formTitle}</span>
+                                <span className="text-sm">{formTitle ? formTitle : "..."}</span>
                             </div>
                         )}
                     </div>
@@ -161,6 +175,7 @@ const EditForm = () => {
                         )}
                 </div >
             </div >
+            <PublishFormModal uuid={formUuid} isModalOpen={isPublishModalOpen} closeModal={closePublishModal} setFormUuid={setFormUuid}/>
         </div >
     );
 };
