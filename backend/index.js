@@ -22,6 +22,12 @@ app.use(express.json()); // To parse json bodies
 
 connectMongoDB(mongoDbUri);
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        message: "The server is up and running"
+    })
+})
+
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
     console.log("username: ", username);
