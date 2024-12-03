@@ -9,13 +9,15 @@ const FormSubmitPage = () => {
     const [form, setForm] = useState({});
     const [currentPageIndex, setCurrentPageIndex] = useState(0); // Track the current page index
     const pages = form.pages || []; // Ensure pages array exists before mapping over it
+    const baseURL = import.meta.env.VITE_BACK_URL;
+
 
     useEffect(() => {
         const fetchSubmitForm = async () => {
             setLoading(true);
             try {
                 console.log("The form is fetched: ");
-                const response = await axios.get(`http://localhost:3000/getsubmitform/${formId}`);
+                const response = await axios.get(`${baseURL}/getsubmitform/${formId}`);
                 if (response.status === 200) {
                     setForm(response.data.form[0]);  // Set the form state with the fetched form data
                 }

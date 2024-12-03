@@ -72,7 +72,7 @@ const EditForm = () => {
     const publishForm = async () => {
         setPublishLoading(true);
         try {
-            const response = await axios.post(`http://localhost:3000/form/publish/${selectedForm._id}`);
+            const response = await axios.post(`${baseURL}/form/publish/${selectedForm._id}`);
             if(response.status === 200){
                 setFormUuid(response.data.uuid);
                 setIsPublishModalOpen(true);

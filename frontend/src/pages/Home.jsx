@@ -42,7 +42,7 @@ const Home = () => {
     // Function to create a new form
     const createDefaultForm = async () => {
         try {
-            const response = await axios.post("http://localhost:3000/createNewForm", {}, {
+            const response = await axios.post(`${baseURL}/createNewForm`, {}, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json"

@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 
 const PublishFormModal = ({ closeModal, isModalOpen, uuid }) => {
-  const [publishedLink, setPublishedLink] = useState(`http://localhost:3000/respond/${uuid}`);
+  const baseURL = import.meta.env.VITE_BACK_URL;
+
+  const [publishedLink, setPublishedLink] = useState(`${baseURL}/respond/${uuid}`);
   const [copyStatus, setCopyStatus] = useState("Copy Link");
+  // const baseURL = import.meta.env.VITE_BACK_URL;
+
 
   useEffect(() => {
     if (uuid) {
-      setPublishedLink(`http://localhost:5173/submitpage/${uuid}`);
+      setPublishedLink(`${baseURL}/submitpage/${uuid}`);
     }
   }, [uuid]);
 

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import axios from 'axios';
+const baseURL = import.meta.env.VITE_BACK_URL;
+
 
 // A utility function to save the user and token in localStorage
 const saveToLocalStorage = (user, token) => {
@@ -43,7 +45,7 @@ const useAuthStore = create((set) => {
     login: async (email, password) => {
       set({ loading: true, error: null });  // Reset error and set loading to true
       try {
-        const response = await axios.post("http://localhost:3000/login", { email, password });
+        const response = await axios.post(`${baseURL}/login`, { email, password });
         const { user, token } = response.data;
         set({ loading: false });
         saveToLocalStorage(user, token);  // Save to localStorage
@@ -59,7 +61,7 @@ const useAuthStore = create((set) => {
     signup: async (username, email, password) => {
       set({ loading: true, error: null });
       try {
-        const response = await axios.post("http://localhost:3000/signup", { username, email, password });
+        const response = await axios.post(`${baseURL}/signup`, { username, email, password });
         return response;
       } catch (err) {
         const errorMessage = err.response?.data?.message || "An unknown error occurred.";

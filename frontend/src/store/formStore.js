@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios"; // Import axios for making HTTP requests
+const baseURL = import.meta.env.VITE_BACK_URL;
+
 
 const useFormStore = create(
   persist(
@@ -23,7 +25,7 @@ const useFormStore = create(
 
       getAllForms: async () => {
         try {
-          const response = await axios.get("http://localhost:3000/getAllForms");
+          const response = await axios.get(`${baseURL}/getAllForms`);
 
           // After getting the response, update the forms state
           set((state) => {
@@ -69,7 +71,7 @@ const useFormStore = create(
           if (!state.selectedForm) return state;
 
           try {
-            const response = await axios.post(`http://localhost:3000/editform/addpage/${state.selectedForm._id}`, {
+            const response = await axios.post(`${baseURL}/editform/addpage/${state.selectedForm._id}`, {
               pageType
             });
             if (response.status === 200) {
@@ -247,7 +249,7 @@ const useFormStore = create(
 // Function to update form in the backend
 const updateFormInBackend = async (updatedForm, set) => {
   try {
-    const response = await axios.put(`http://localhost:3000/updateform/${updatedForm._id}`, updatedForm);
+    const response = await axios.put(`${baseURL}/updateform/${updatedForm._id}`, updatedForm);
 
     if (response.status === 200) {
       console.log("Form updated successfully in the backend.");
