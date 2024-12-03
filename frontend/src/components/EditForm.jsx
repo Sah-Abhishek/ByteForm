@@ -13,7 +13,7 @@ const EditForm = () => {
     const { selectForm, getAllForms, selectedForm, currentPageIndex, setCurrentPageIndex, updateFormTitleAndDescription } = useFormStore(); // Zustand store for selected form
 
     const [formTitle, setFormTitle] = useState(selectedForm?.title); // Form title state
-    const baseURL = import.meta.VITE_BACK_URL;
+    const baseURL = import.meta.env.VITE_BACK_URL;
     const state = useFormStore.getState();
     const [formUuid, setFormUuid] = useState('');
 
@@ -73,12 +73,17 @@ const EditForm = () => {
         setPublishLoading(true);
         try {
             const response = await axios.post(`${baseURL}/form/publish/${selectedForm._id}`);
-            if(response.status === 200){
+            console.log(`${baseURL}/form/publish/${selectedForm._id}`)
+            if (response.status === 200) {
                 setFormUuid(response.data.uuid);
                 setIsPublishModalOpen(true);
             }
 
         } catch (error) {
+            // console.log("This is the baseURL: ", baseURL);
+            // console.log(import.meta.env); // Log all environment variables
+
+            // console.log(`${baseURL}`)
             console.log("There was an error while publishing form: ", error);
         } finally {
             setPublishLoading(false);
@@ -175,7 +180,7 @@ const EditForm = () => {
                         )}
                 </div >
             </div >
-            <PublishFormModal uuid={formUuid} isModalOpen={isPublishModalOpen} closeModal={closePublishModal} setFormUuid={setFormUuid}/>
+            <PublishFormModal uuid={formUuid} isModalOpen={isPublishModalOpen} closeModal={closePublishModal} setFormUuid={setFormUuid} />
         </div >
     );
 };
