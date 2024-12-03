@@ -34,9 +34,7 @@ const formFieldSchema = new mongoose.Schema({
     },
     order: {
         type: Number, // To maintain the order of pages/fields in the form
-        
     },
-    
 }, {
     timestamps: true
 });
@@ -52,6 +50,9 @@ const formSchema = new mongoose.Schema({
     description: {
         type: String,
         trim: true,
+    },
+    responses: {
+        type: [{}]
     },
     pages: {
         type: [formFieldSchema], // Array of fields (or "pages")

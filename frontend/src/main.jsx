@@ -9,6 +9,7 @@ import Signup from './components/Signup.jsx';
 import EditForm from './components/EditForm.jsx';
 import FormSubmitPage from './pages/FormSubmitPage.jsx';
 import NotFound from './pages/NotFound.jsx';
+import Results from './pages/Results.jsx';
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,9 @@ const router = createBrowserRouter([
   {
     path: "submitpage/:formId",
     element: <FormSubmitPage />
+  },{
+    path: "results/:formId",
+    element: <Results />
   },
   {
     path: "*",  // Catch-all route for undefined paths

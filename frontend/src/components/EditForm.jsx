@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useFormStore from "../store/formStore"; // Zustand store for selected form
 import LeftSideBar from "./LeftSideBar";
@@ -9,13 +9,14 @@ import PublishFormModal from "./PublishFormModal";
 
 const EditForm = () => {
     const { formId } = useParams(); // Get form ID from URL
-    const { user } = useAuthStore(); // Get the current user from auth store
+    const { user, token } = useAuthStore(); // Get the current user from auth store
     const { selectForm, getAllForms, selectedForm, currentPageIndex, setCurrentPageIndex, updateFormTitleAndDescription } = useFormStore(); // Zustand store for selected form
 
     const [formTitle, setFormTitle] = useState(selectedForm?.title); // Form title state
     const baseURL = import.meta.env.VITE_BACK_URL;
     const state = useFormStore.getState();
     const [formUuid, setFormUuid] = useState('');
+    const navigate = useNavigate();
 
     const [isEditing, setIsEditing] = useState(false);
     const titleRef = useRef(null);
@@ -88,7 +89,7 @@ const EditForm = () => {
         } finally {
             setPublishLoading(false);
         }
-        getAllForms();
+        getAllForms(token);
 
     }
 
@@ -128,6 +129,10 @@ const EditForm = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                     <div>
+                        <button onClick={() => navigate(`/results/${selectedForm._id}`)} className="bg-[#0c0601] text-white rounded-md px-3 py-1 mr-4 text-mbase">Results</button>
+                    </div>
+                    <div>
+
 
                         <button onClick={publishForm} className="flex items-center bg-black  text-white rounded-md px-3 py-1 mr-4 text-mbase">
                             {publishLoading ? (

@@ -266,6 +266,27 @@ app.post("/createNewForm", authMiddleware, async (req, res) => {
     }
 })
 
+app.delete("/deleteForm/:formId", async (req, res) => {
+    const { formId } = req.params;
+    try {
+        // Delete the form by its _id
+        const result = await Form.deleteOne({ _id: formId });
+
+        // Check if the form was found and deleted
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "Form not found" });
+        }
+
+        // Send a success response
+        return res.status(200).json({ message: "Form deleted successfully" });
+    } catch (error) {
+        // Handle errors (e.g., database issues)
+        console.error(error);
+        return res.status(500).json({ message: "An error occurred while deleting the form" });
+    }
+});
+
+
 
 
 app.post("/editform/addPage/:formId", async (req, res) => {
@@ -353,11 +374,13 @@ app.post("/form/publish/:formId", async (req, res) => {
         console.log("This is from the form/publish: ", uuid);
 
         const form = await Form.findById(formId);
-        console.log(form)
+        // console.log(form)
 
-        if (!form) {return res.status(404).json({
-            message: "Form not found"
-        })};
+        if (!form) {
+            return res.status(404).json({
+                message: "Form not found"
+            })
+        };
 
         form.uuid = uuid;
 
@@ -365,10 +388,13 @@ app.post("/form/publish/:formId", async (req, res) => {
 
         await form.save();
 
+
         res.status(200).json({
             message: "Form published successfully",
             uuid: uuid
         })
+        console.log("This is above undefined: ")
+
     } catch (error) {
         console.log("There was an error while publishing the form: ", error);
         res.status(500).json({
@@ -379,13 +405,13 @@ app.post("/form/publish/:formId", async (req, res) => {
 
 })
 
-app.get("/getsubmitform/:uuid", async(req, res) => {
+app.get("/getsubmitform/:uuid", async (req, res) => {
     const uuid = req.params.uuid;
 
-    try{
-        const form = await Form.find({uuid: uuid});
+    try {
+        const form = await Form.find({ uuid: uuid });
 
-        if(!form){
+        if (!form) {
             res.status(404).json({
                 message: "There was an error while fetching form"
             })
@@ -398,7 +424,7 @@ app.get("/getsubmitform/:uuid", async(req, res) => {
 
 
 
-    }catch(error){
+    } catch (error) {
         console.log("There was an error fetching form: ", error);
         res.status(500).json({
             message: "Internal Server Error"
@@ -409,8 +435,23 @@ app.get("/getsubmitform/:uuid", async(req, res) => {
 
 
 
-app.get("/getAllForms", async (req, res) => {
+app.get("/getAllForms", authMiddleware, async (req, res) => {
+    console.log("This is the user from getAllForms: ", req.user.username);
+    const username = req.user.username;
+    const email = req.user.email;
+    console.log("This is the email: ", email, username);
+
     try {
+        const user = await User.findOne({ username: username });
+        // console.log("This is the user from database: ", user);
+        // console.log("This is the user.email form database: ", user.email)
+        // const email = await User.find({ email: req.user.email });
+        if (req.user.email !== user.email) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+        console.log("This is the user from getAllForms: ", user, email);
         const forms = await Form.find();
         res.status(200).json(forms);
 
@@ -421,6 +462,64 @@ app.get("/getAllForms", async (req, res) => {
         })
     }
 })
+
+app.post("/submitform/:formId", async (req, res) => {
+    const { formId } = req.params;
+    console.log("This the formId: ", formId);
+    const { responses } = req.body;  // The responses object will contain user answers for each field in the form
+    console.log("This is the responses: ", responses);
+
+    try {
+        // Find the form by ID
+        const form = await Form.findById(formId);
+
+        if (!form) {
+            return res.status(404).json({
+                message: "Form not found"
+            });
+        }
+        if (!responses || responses.length === 0) {
+            return res.status(400).json({
+                message: "No responses provided"
+            });
+        }
+
+        // Save the responses to the form
+        form.responses = [...form.responses, responses];
+        await form.save();  // Don't forget to save the form after updating the responses
+
+        res.status(200).json({
+            message: "Form Submitted Successfully"
+        });
+    } catch (error) {
+        console.error("Error while submitting form:", error);
+        res.status(500).json({
+            message: "Error while submitting form"
+        });
+    }
+});
+
+app.get("/getResults/:formId", async(req, res) => {
+    const { formId } = req.params;
+    try{
+        const form = await Form.findById(formId);
+
+        if(!form){
+            res.status(404).json({
+                message: "Form was not found"
+            })
+        }
+        res.status(200).json(form.responses);
+
+    }catch(error){
+        console.log("There was an error while fetching results: ", error);
+        res.status(500).json({
+            message: "Error while fetching data"
+        })
+    }
+})
+
+
 
 
 

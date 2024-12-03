@@ -3,7 +3,8 @@ const jwtSecret = process.env.JWT_SECRET;
 
 const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    console.log(authHeader);
+    console.log("This is the authHeader:", authHeader);
+    
     if(!authHeader){
         return res.status(403).json({
             message: "Authorization token is required"

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import axios from "axios"; // Import axios for making HTTP requests
+import useAuthStore from "./authStore";
 const baseURL = import.meta.env.VITE_BACK_URL;
 
 
@@ -22,10 +23,40 @@ const useFormStore = create(
         set((state) => ({
           selectedForm: state.forms.find((form) => form._id === formId) || null,
         })),
+        
+        deleteForm: (formId) => set(async (state) => {
+          try {
+              // Make the API call to delete the form from the server
+              const response = await axios.delete(`${import.meta.env.VITE_BACK_URL}/deleteForm/${formId}`, {
+                  headers: {
+                      "Authorization": `Bearer ${state.token}`, // Include token in the headers for authorization
+                      "Content-Type": "application/json"
+                  }
+              });
+      
+              if (response.status === 200) {
+                  // If the form is successfully deleted on the server, update the local state
+                  const updatedForms = state.forms.filter((form) => form._id !== formId);
+                  return { forms: updatedForms }; // Update forms state with the remaining forms
+              } else {
+                  console.error("Failed to delete form, server response: ", response);
+              }
+          } catch (error) {
+              console.error("There was an error while deleting the form: ", error);
+          }
+      }),
+      
 
-      getAllForms: async () => {
+      getAllForms: async (token) => {
+        // const { token } = useAuthStore();
+
         try {
-          const response = await axios.get(`${baseURL}/getAllForms`);
+          const response = await axios.get(`${baseURL}/getAllForms`, {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          });
 
           // After getting the response, update the forms state
           set((state) => {
