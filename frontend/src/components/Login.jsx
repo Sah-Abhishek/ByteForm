@@ -37,11 +37,13 @@ const Login = () => {
         }
     };
 
+    
+
     return (
         <div>
             {/* Signup link */}
             <nav className="fixed top-0 right-0 m-3 text-sm">
-                <div>Don't have an account? <span><button className="border rounded-md px-4 py-1 border-black mx-2">Sign up</button></span></div>
+                <div>Don't have an account? <span><button onClick={() => navigate("/signup")} className="border rounded-md px-4 py-1 border-black mx-2">Sign up</button></span></div>
             </nav>
             <div className="flex flex-col space-y-5 justify-center items-center h-screen">
                 <div className="text-3xl font-bold mb-5">ByteForm</div>

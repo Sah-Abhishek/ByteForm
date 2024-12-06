@@ -451,6 +451,7 @@ app.get("/getAllForms", authMiddleware, async (req, res) => {
                 message: "User not found"
             })
         }
+        console.log("These are the user from getAllForms: ", user);
         console.log("This is the user from getAllForms: ", user, email);
         const forms = await Form.find();
         res.status(200).json(forms);

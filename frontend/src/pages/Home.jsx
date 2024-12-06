@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios, { getAdapter } from "axios";
 import { BsThreeDots } from "react-icons/bs";
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,29 +14,21 @@ const Home = () => {
   const { forms, setForms, selectForm, deleteForm } = useFormStore();
   const [dropDownOpen, setDropDownOpen] = useState(null); // Track the index of the dropdown that is open
 
-  // Fetch forms when the component mounts or when token or user changes
-  useEffect(() => {
-    if (!user || !token) {
-      return navigate('/login');
+
+  const fetchForms = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/getAllForms`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      setForms(response.data); // Update state with fetched forms
+    } catch (error) {
+      console.log("Error fetching forms: ", error);
     }
-
-    const fetchForms = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/getAllForms`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-        setForms(response.data); // Update state with fetched forms
-      } catch (error) {
-        console.log("Error fetching forms: ", error);
-      }
-    };
-
-    fetchForms();
-  }, [token, user, navigate, baseURL, setForms]);
-
+  };
+  
   const createDefaultForm = async () => {
     try {
       const response = await axios.post(`${baseURL}/createNewForm`, {}, {
@@ -45,7 +37,9 @@ const Home = () => {
           'Content-Type': 'application/json'
         }
       });
-      if (response.status === 200) {
+      console.log(response.status)
+      if (response.status === 201) {
+        
         toast.success("Form created");
         const newForms = await axios.get(`${baseURL}/getAllForms`, {
           headers: {
@@ -53,12 +47,33 @@ const Home = () => {
             'Content-Type': 'application/json'
           }
         });
+        console.log("The createDefault form is executed: ", )
+        fetchForms();
         setForms(newForms.data); // Refresh the form list after creating
       }
     } catch (err) {
       console.log("Error creating form: ", err);
     }
   };
+
+
+  
+  // Fetch forms when the component mounts or when token or user changes
+  useEffect(() => {
+    if (!user || !token) {
+      return navigate('/login');
+    }
+
+    
+
+    fetchForms();
+  }, [token, user, navigate, baseURL, setForms, ]);
+
+
+
+  
+
+  
 
   const handleFormClick = (formId) => {
     selectForm(formId);
@@ -121,7 +136,7 @@ const Home = () => {
         <div><button className="bg-red text-white rounded-md px-3 py-1 mr-4 bg-[#ae4e09] text-sm">View plans</button></div>
       </nav>
 
-      <div className="flex flex-col justify-center items-center mx-6 bg-gray-100 h-[calc(100vh-72px)] overflow-auto rounded-xl">
+      <div className="flex flex-col justify-center items-center mx-6 bg-gray-100 h-[calc(100vh-72px)] py-10 overflow-auto rounded-xl">
         <div className="flex justify-center items-center">
           <button onClick={createDefaultForm} className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-700 transition w-80 font-semibold">+ &nbsp; Create a new form</button>
         </div>
@@ -134,7 +149,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3 overflow-y-auto scrollbar-hidden">
           {forms.map((form, index) => (
             <div key={form._id} className="flex cursor-pointer items-center justify-between px-4 py-3 bg-white border border-gray-300 w-[1500px] rounded-lg hover:shadow-[0_2px_4px_rgba(0,0,0,0.05),0_-2px_4px_rgba(0,0,0,0.05),2px_0_4px_rgba(0,0,0,0.05),-2px_0_4px_rgba(0,0,0,0.05)] transition relative">
               <h3 className="w-[66.66%]" onClick={() => handleFormClick(form._id)}>{form.title}</h3>
@@ -162,7 +177,7 @@ const Home = () => {
                 </div>
               )}
             </div>
-          ))}
+          )).reverse()}
         </div>
       </div>
     </div>

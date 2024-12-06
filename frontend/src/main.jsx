@@ -10,6 +10,7 @@ import EditForm from './components/EditForm.jsx';
 import FormSubmitPage from './pages/FormSubmitPage.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Results from './pages/Results.jsx';
+import { ToastContainer } from 'react-toastify';
 
 const router = createBrowserRouter([
   {
@@ -28,7 +29,7 @@ const router = createBrowserRouter([
   {
     path: "submitpage/:formId",
     element: <FormSubmitPage />
-  },{
+  }, {
     path: "results/:formId",
     element: <Results />
   },
@@ -39,8 +40,21 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')).render(
+  <>
+    <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+    />
 
-  <RouterProvider router={router} />
+    <RouterProvider router={router} />
+  </>
 
 
 )
